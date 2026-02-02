@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine Surprise</title>
+<style>
+  body {
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffe6e6;
+    font-family: Arial, sans-serif;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  h1 {
+    color: #ff3366;
+    font-size: 2.5rem;
+    margin-bottom: 50px;
+    text-align: center;
+  }
+
+  .arena {
+    position: relative;
+    width: 600px;
+    height: 200px;
+  }
+
+  button {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+  }
+
+  #yes {
+    left: 150px;
+    top: 80px;
+    background: #ff6699;
+    color: white;
+    z-index: 1;
+  }
+
+  #no {
+    left: 350px;
+    top: 80px;
+    background: #999;
+    color: white;
+    z-index: 2;
+    transition: left 0.1s ease-out, top 0.1s ease-out; /* buttery smooth */
+  }
+
+  /* Floating GIF style */
+  #celebration {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    display: none; /* hidden by default */
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<h1>Anina, will you be my Valentine?</h1>
+
+<div class="arena">
+  <button id="yes">Yes</button>
+  <button id="no">No</button>
+  <img id="celebration" src="https://media.giphy.com/media/3o6ZtpxSZbQRRnwCKQ/giphy.gif" alt="Dancing">
+</div>
+
+<script>
+const noBtn = document.getElementById("no");
+const yesBtn = document.getElementById("yes");
+const celebration = document.getElementById("celebration");
+
+const SAFE_DISTANCE = 120; // Distance No keeps from Yes
+const MOVE_AMOUNT = 40;    // How far No moves each frame
+
+// Track mouse position
+let mouseX = 0;
+let mouseY = 0;
+document.addEventListener("mousemove", e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+// Animate No button smoothly
+function animateNo() {
+  const noRect = noBtn.getBoundingClientRect();
+  const yesRect = yesBtn.getBoundingClientRect();
+
+  const noCenterX = noRect.left + noRect.width / 2;
+  const noCenterY = noRect.top + noRect.height / 2;
+
+  const dx = noCenterX - mouseX;
+  const dy = noCenterY - mouseY;
+  const distance = Math.sqrt(dx*dx + dy*dy);
+
+  if(distance < 100) { // Run away if mouse is close
+    let moveX = (dx / distance) * MOVE_AMOUNT;
+    let moveY = (dy / distance) * MOVE_AMOUNT;
+
+    let newLeft = noBtn.offsetLeft + moveX;
+    let newTop = noBtn.offsetTop + moveY;
+
+    // Prevent No from overlapping Yes
+    const yesCenterX = yesBtn.offsetLeft + yesBtn.offsetWidth / 2;
+    if(Math.abs(newLeft - yesCenterX) < SAFE_DISTANCE) {
+      if(newLeft < yesCenterX) newLeft = yesCenterX - SAFE_DISTANCE;
+      else newLeft = yesCenterX + SAFE_DISTANCE;
+    }
+
+    // Keep No inside arena
+    const arena = document.querySelector('.arena');
+    newLeft = Math.max(0, Math.min(arena.offsetWidth - noRect.width, newLeft));
+    newTop = Math.max(0, Math.min(arena.offsetHeight - noRect.height, newTop));
+
+    noBtn.style.left = newLeft + "px";
+    noBtn.style.top = newTop + "px";
+  }
+
+  requestAnimationFrame(animateNo);
+}
+
+animateNo();
+
+// Show floating GIF only when Yes is clicked
+yesBtn.addEventListener("click", () => {
+  celebration.style.display = "block";
+});
+</script>
+
+</body>
+</html>
